@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Blogpost Generator</title>
+<style>
+  body { font-family: sans-serif; max-width: 600px; margin: 40px auto; }
+  label { display: block; margin-top: 15px; }
+  input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+  button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<h1>Blogpost Generator (YAML)</h1>
+
+<label>Datum (YYYY-MM-DD)</label>
+<input type="date" id="date">
+
+<label>Titel</label>
+<input type="text" id="title">
+
+<label>Thema / Topic</label>
+<input type="text" id="topic">
+
+<label>Author</label>
+<input type="text" id="author">
+
+<label>Bio</label>
+<textarea id="bio" rows="3"></textarea>
+
+<label>Content</label>
+<textarea id="content" rows="6"></textarea>
+
+<label>Tags (kommagetrennt)</label>
+<input type="text" id="tags">
+
+<button onclick="generateYAML()">Generate YAML</button>
+
+<pre id="output" style="margin-top:20px; background:#f4f4f4; padding:10px;"></pre>
+
+<script>
+function generateYAML() {
+  const date = document.getElementById('date').value;
+  const title = document.getElementById('title').value;
+  const topic = document.getElementById('topic').value;
+  const author = document.getElementById('author').value;
+  const bio = document.getElementById('bio').value;
+  const content = document.getElementById('content').value;
+  const tagsInput = document.getElementById('tags').value;
+  const tagsArray = tagsInput.split(',').map(t => t.trim()).filter(t => t);
+
+  let yaml = `title: ${title}\ndate: ${date}\ntopic: ${topic}\nauthor: ${author}\nbio: ${bio}\ncontent: |\n`;
+
+  // content Zeilenweise einrücken
+  content.split('\n').forEach(line => {
+    yaml += `  ${line}\n`;
+  });
+
+  yaml += 'tags:\n';
+  tagsArray.forEach(tag => {
+    yaml += `  - ${tag}\n`;
+  });
+
+  const output = document.getElementById('output');
+  output.textContent = yaml;
+
+  // automatisch als Datei herunterladen
+  const blob = new Blob([yaml], { type: 'text/yaml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${date}-${title.toLowerCase().replace(/\s+/g,'-')}.yaml`;
+  a.click();
+}
+</script>
+
+</body>
+</html>
