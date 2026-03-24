@@ -1,0 +1,34 @@
+name: Content Generator (Hugging Face)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repo auschecken
+        uses: actions/checkout@v3
+
+      - name: Content generieren mit Hugging Face
+        env:
+          HF_API_KEY: ${{ secrets.HF_API_KEY }}
+        run: |
+          PROMPT=$(cat prompts/instagram.txt)
+          BOOK=$(cat book/chapter1.txt)
+
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: Bearer $HF_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"inputs":"'"$PROMPT\n\n$BOOK"'"}' \
+            https://api-inference.huggingface.co/models/tiiuae/falcon-7b)
+
+          echo "$RESPONSE" > output/posts.json
+
+      - name: Ergebnis anzeigen (formatiert)
+        run: |
+          cat output/posts.json | jq
